@@ -55,7 +55,7 @@ const Questions = [
     },
     {
         name: 'textColor',
-        message: 'Enter a background color (name or hex format: #00FFAA): ',
+        message: 'Enter a text color (name or hex format: #00FFAA): ',
         validate: validateColor
     },
     {
@@ -84,7 +84,7 @@ const init = () => {
             const userShape = chooseShape(shapeChoice, shapeColor)
             const userText = new Txt(txt, textColor)
             const userSVG = createSVG(userText.render(), userShape.render(), bg_color)
-            fs.writeFileSync('logo.svg', userSVG)
+            fs.writeFileSync('./examples/logo.svg', userSVG)
         })
         .then(()=>{
             console.log('Generated logo.svg')
