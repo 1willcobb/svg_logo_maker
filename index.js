@@ -1,24 +1,10 @@
 const inquirer = require('inquirer')
-//const shape = require('./lib/shape')
-//const square = require('./lib/square')
+const Square = require('./lib/square')
 const Circle = require('./lib/circle')
-//const triangle = require('./lib/triangle')
+const Triangle = require('./lib/triangle')
 const fs = require('fs')
-const { error } = require('console')
-
-
-
-//TODO - PROMPT i can enter up to 3 characters for the text for my SVG 
-const intro_questions = [
-,
-    {
-        name: 'chars',
-        message: 'Enter up to 3 chars to represent my logo'
-    },
-
-]
-
-
+const Txt = require('./lib/text')
+const colorString = require('color-string');
 
 const createSVG = (txt, shape, bg_color) => {
     return (`
@@ -42,77 +28,72 @@ const chooseShape = (shape, shapeColor) => {
     }
 }
 
+const validateTxt = (txt) => {
+    if ((txt.length > 0 && txt.length < 4)) {
+        return true;
+    } else {
+        return 'Must enter at least 1 but no more than 3 chars.'
+    }
+}
+
+const validateColor = (color) => {
+    const convertedColor = colorString.get(color)
+    if (convertedColor !== null) {
+        return true;
+    } else {
+        return 'Not a valid color'
+    }
+}
+
+
+
+const Questions = [
+    {
+        name: 'txt',
+        message: 'Welcome to the SVG creator.\nEnter up to 3 chars to represent the logo: ',
+        validate: validateTxt
+    },
+    {
+        name: 'textColor',
+        message: 'Enter a background color (name or hex format: #00FFAA): ',
+        validate: validateColor
+    },
+    {
+        name: 'shapeChoice',
+        message: 'Choose a shape:',
+        choices: ['circle', 'triangle', 'square'],
+        type: 'list'
+    },
+    {
+        name: 'shapeColor',
+        message: 'Enter a shape color (name or hex format: #00FFAA): ',
+        validate: validateColor
+    },
+    {
+        name: 'bg_color',
+        message: 'Enter a background color (name or hex format: #00FFAA): ',
+        validate: validateColor
+    }
+]
+
 
 const init = () => {
     inquirer
-        .prompt([
-            {
-                type: 'confirm',
-                name: 'welcome',
-                message: 'Welcome to the SVG logo generator.\nDo you want to make your own SVG?'
-            },
-        ])
-        .then(({ welcome }) => {
-            if (welcome) {
-                console.log(welcome)
-                console.log("okay, bye for now")
-                prompt.ui.close()
-            }
-        })
-        .catch((error) => {
-            console.log(error)
-            console.log("not an option")
-        })
-        .then(() => {
-            inquirer
-        .prompt([
-            {
-                name: 'chars',
-                message: 'Enter up to 3 chars to represent my logo: '
-            },
-            {
-                name: 'textColor',
-                message: 'Enter text color (name a color or a hex number 0x00FFAA): '
-            },
-            {
-                name: 'shapeChoice',
-                message: 'Choose a shape:',
-                choices: ['circle', 'triangle', 'square'],
-                type: 'list'
-            },
-            {
-                name: 'shapeColor',
-                message: 'Enter the shape color (name a color or a hex number 0x00FFAA): '
-            }
-
-        ])
-        .then(({ chars, textColor, shapeChoice, shapeColor }) => {
+        .prompt(Questions)
+        .then(({ txt, textColor, shapeChoice, shapeColor, bg_color}) => {
             const userShape = chooseShape(shapeChoice, shapeColor)
-            console.log(userShape.render())
-            //fs.writeFileSync('svg.svg', user_svg)
+            const userText = new Txt(txt, textColor)
+            const userSVG = createSVG(userText.render(), userShape.render(), bg_color)
+            fs.writeFileSync('logo.svg', userSVG)
         })
-        .then(() => {
-
+        .then(()=>{
+            console.log('Generated logo.svg')
         })
         .catch((err) => {
             console.log(err)
             console.log("hmm... something didn't work...")
         })
-        })
-    
 }
-
-
-
-//TODO - Shape with LIST of shapes: circle, triangle, square
-
-//TODO - prompted for text color: i can respond with color name OR hex number
-
-//TODO - at the end an SVG file is generated with title 'logo.svg'
-
-//TODO - command line statement stating "generated logo.svg"
-//console.log("Generated logo.svg")
-
-//TODO when i open the file i am shown a 300x200 pixel images that matches what i went through
+    
 
 init();
